@@ -5,7 +5,7 @@ library(tidyverse)
 setwd("~/Documents/Data Science/Personal Project/fitness_class_project")
 
 # Import data
-goalzone_fc <- read_csv("fitness_class_2212.csv")
+goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class_project/master/fitness_class_2212.csv")
 
 # Investigate the data frame
 
