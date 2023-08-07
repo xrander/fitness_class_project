@@ -1,5 +1,6 @@
 # Load libraries
 library(tidyverse)
+library(ggthemes)
 
 # Set working directories
 setwd("~/Documents/Data Science/Personal Project/fitness_class_project")
@@ -28,12 +29,38 @@ goalzone_fc <- goalzone_fc %>%
                                      ifelse(day_of_week == "Monday", "Mon", day_of_week)))),
          time = factor(time, levels = c("AM", "PM"),ordered = T),
          category = factor(ifelse(category == "-", "Unknown", category)),
-         attended = factor(attended, levels = c(1,0)))
+         attended = factor(attended, levels = c(1,0), labels = c("yes", "no")))
 
 summary(goalzone_fc) # quick summary statistics of the data
 # weight is having 20 missing values
 
 #replacing na in weight
 goalzone_fc <- goalzone_fc %>%
-  mutate(weight = replace_na(weight, mean(weight, na.rm = T)))
+  mutate(weight = replace_na(weight, mean(weight, na.rm = T)),
+         weight = round(weight, 2))
 
+
+goalzone_fc %>%
+  ggplot(aes(category, fill = time))+
+  geom_bar(position = "dodge")+
+  facet_wrap(~attended)
+
+goalzone_fc %>%
+  ggplot(aes(time, fill = day_of_week))+
+  geom_bar(position = "dodge")+
+  scale_fill_brewer(palette = 2,
+                    direction = -1)
+
+
+ggplot(goalzone_fc, aes(time, fill = day_of_week))+
+  geom_bar(position = "dodge")+
+  facet_wrap(~attended)+
+  scale_fill_viridis_d()+
+  theme_clean()
+
+
+## Number of months as a member
+ggplot(goalzone_fc, aes(months_as_member))+
+  geom_histogram(binwidth = 2)
+
+max(goalzone_fc$months_as_member)
