@@ -54,6 +54,26 @@ goalzone_fc <- goalzone_fc %>%
 
 summary(goalzone_fc) # quick summary statistics of the data
 
+# Single variable 
+goalzone_fc %>% ggplot(aes(days_before))+
+  geom_histogram()
+
+goalzone_fc %>%
+  ggplot(aes(weight)) +
+  geom_histogram(binwidth = 3)
+
+goalzone_fc %>% ggplot(aes(months_as_member))+
+  geom_density()+
+  labs(y = "density",
+       x = "months as member") #a
+
+# Multiple variable visualization
+ggplot(goalzone_fc, aes(attended))+
+  geom_bar() # no has more observation
+
+ggplot(goalzone_fc, aes(attended))+
+  geom_bar()+
+  facet_wrap(~category)
 
 goalzone_fc %>%
   ggplot(aes(category, fill = time))+
