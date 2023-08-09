@@ -71,9 +71,9 @@ goalzone_fc %>% ggplot(aes(months_as_member))+
 ggplot(goalzone_fc, aes(attended))+
   geom_bar() # no has more observation
 
-ggplot(goalzone_fc, aes(attended))+
-  geom_bar()+
-  facet_wrap(~category)
+ggplot(goalzone_fc, aes(attended, fill = category))+
+  geom_bar(position = "dodge")+
+  theme_igray()
 
 goalzone_fc %>%
   ggplot(aes(category, fill = time))+
