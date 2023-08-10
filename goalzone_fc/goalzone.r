@@ -109,9 +109,12 @@ goalzone_fc_md_data <- goalzone_fc %>%
 
 # Set seed
 set.seed(50)
-rsample
+
+# Selecting training and test from the data
+split <- initial_split(goalzone_fc_md_data, prop = 0.7)
+goalzone_train <- training(split)
+goalzone_test <- testing(split)
 
 (fmla <- as.formula(attended~.))
-goalzone_model <- glm(fmla, data = goalzone)
-
+goalzone_model <- glm(fmla, data = goalzone_test)
 
