@@ -2,6 +2,7 @@
 library(tidyverse)
 library(ggthemes)
 library(e1071)
+library(rsample)
 
 # Set working directories
 setwd("~/Documents/Data Science/Personal Project/fitness_class_project")
@@ -48,7 +49,7 @@ goalzone_fc <- goalzone_fc %>%
          # replace missing data with mean of weights and round to 2 decimal place
          weight = round(replace_na(weight, mean(weight, na.rm = T)), 2),
          time = factor(time, levels = c("AM", "PM"),ordered = T),
-         category = factor(ifelse(category == "-", "Unknown", category)),
+         category = factor(ifelse(category == "-", "Unknown", category), ordered = F),
          attended = factor(attended, levels = c(1,0), labels = c("yes", "no")))
 
 
@@ -56,50 +57,61 @@ summary(goalzone_fc) # quick summary statistics of the data
 
 # Single variable 
 goalzone_fc %>% ggplot(aes(days_before))+
-  geom_histogram()
+  geom_histogram(binwidth = 3)
+
+goalzone_fc %>% ggplot(aes(day_of_week))+
+  geom_bar()
 
 goalzone_fc %>%
   ggplot(aes(weight)) +
   geom_histogram(binwidth = 3)
 
-goalzone_fc %>% ggplot(aes(months_as_member))+
-  geom_density()+
-  labs(y = "density",
-       x = "months as member") #a
-
 # Multiple variable visualization
-ggplot(goalzone_fc, aes(attended))+
-  geom_bar() # no has more observation
+### Create count data of gym exercise category according to attendance
+goalzone_fc_count <- goalzone_fc %>%
+  group_by(attended, category) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count)) 
+
+### mutate category levels, adjusted according to their count data
 
 ggplot(goalzone_fc, aes(attended, fill = category))+
   geom_bar(position = "dodge")+
+  geom_text(data = goalzone_fc_count,
+            aes(y = count, label = count),
+            position = position_dodge(1),
+            vjust = 0.02)+
+  theme_igray()+
+  labs(x = "Attended",
+       y = "Count")+
+  ggtitle("Attendance according to Gym Class Category")
+
+# Months as member distribution
+goalzone_fc %>% ggplot(aes(months_as_member))+
+  geom_density()+
+  labs(y = "density",
+       x = "months as member")
+"months as member is positively skewed or right-skewed"
+
+goalzone_fc %>% ggplot(aes(attended, months_as_member))+#, fill = category))+
+  geom_boxplot()+
+  #geom_jitter(alpha = 0.3,
+   #           col = "springgreen3")+
+  labs(y = "Months as member",
+       x = "Attended")+
   theme_igray()
 
-goalzone_fc %>%
-  ggplot(aes(category, fill = time))+
-  geom_bar(position = "dodge")+
-  facet_wrap(~attended)+
-  scale_fill_brewer(palette = 18,
-                    direction = -1)
-  theme_bw
 
-goalzone_fc %>%
-  ggplot(aes(time, fill = day_of_week))+
-  geom_bar(position = "dodge")+
-  scale_fill_brewer(palette = 2,
-                    direction = -1)
+# Type of Machine Learning Problem
+#### To predict the outcome of attendance, a logistic regression or Decision Tree can be used
+goalzone_fc_md_data <- goalzone_fc %>%
+  select(-1) # preparing the data
 
+# Set seed
+set.seed(50)
+rsample
 
-ggplot(goalzone_fc, aes(time, fill = day_of_week))+
-  geom_bar(position = "dodge")+
-  facet_wrap(~attended)+
-  scale_fill_viridis_d()+
-  theme_clean()
+(fmla <- as.formula(attended~.))
+goalzone_model <- glm(fmla, data = goalzone)
 
-
-## Number of months as a member
-ggplot(goalzone_fc, aes(months_as_member))+
-  geom_histogram(binwidth = 2)
-
-max(goalzone_fc$months_as_member)
 
