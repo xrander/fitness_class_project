@@ -1,10 +1,10 @@
 # Load libraries
 library(tidyverse)
 library(ggthemes)
-library(e1071)
 library(rsample)
 library(pROC)
 library(rpart)
+library(rpart.plot)
 
 # Set working directories
 setwd("~/Documents/Data Science/Personal Project/fitness_class_project")
@@ -110,6 +110,8 @@ goalzone_fc %>% ggplot(aes(factor(attended), months_as_member, fill = category))
 goalzone_fc_md_data <- goalzone_fc %>%
   select(-1) # preparing the data
 
+# Model 1
+
 # Set seed
 set.seed(50)
 
@@ -119,7 +121,9 @@ goalzone_train <- training(split) #training data
 goalzone_test <- testing(split) #testing data
 
 # Train the model
-goalzone_model <- glm(attended ~ ., data = goalzone_train, family = "binomial")
+goalzone_model <- glm(attended ~ .,
+                      data = goalzone_train,
+                      family = "binomial")
 
 summary(goalzone_model)
 
@@ -131,12 +135,64 @@ goalzone_test <- goalzone_test %>%
 mean(goalzone_test$attended)
 mean(goalzone_test$pred)
 
+# Build the confusion matrix
+table(goalzone_test$attended, goalzone_test$pred)
+
+# Model (logistic regression) Prediction performance
 mean(goalzone_test$attended == goalzone_test$pred)
 
-# Testing model performance via visualization
+# Calculate the ROC
 roc_curve <- roc(goalzone_test$attended, goalzone_test$pred)
 
-plot(roc_curve, col = "red")
-auc(roc_curve) #area under the curve is 0.7372
+# Visual model performance using ROC(Receiver Operating Characteristics Cost)
+plot(roc_curve,
+     col = "red",
+     main = "Logistic Regression ROC Curve")
+text(2, 2,
+     "AUC = 0.75",
+     adj=c(1,0.5),
+     font = 1,
+     cex = 1.0,
+     col = "red")
 
+# Estimate the Area under the curve of the ROC
+auc(roc_curve) #area under the curve is 0.7517
 
+# Model 2
+## Decision trees (rpart) will be used as the second model
+goalzone_model2 <-  rpart(attended ~ .,
+                          goalzone_train,
+                          method = "class")
+
+# Visualize the decision tree
+rpart.plot(goalzone_model2,
+           type = 4,
+           box.palette = c("red", "green"),
+           fallen.leaves = TRUE)
+
+# Predict the outcome using model 2
+goalzone_test <- goalzone_test %>%
+  mutate(pred2 = as.numeric(as.character(predict(goalzone_model2, goalzone_test, type = "class"))))
+
+# Compare model with actual outcome
+mean(goalzone_test$attended)
+mean(goalzone_test$pred2)
+
+# Build the confusion matrix
+table(goalzone_test$attended, goalzone_test$pred2)
+
+# Model2 (Decision trees) prediction performance 
+mean(goalzone_test$attended == goalzone_test$pred2)
+
+roc_curve2<- roc(goalzone_test$attended, goalzone_test$pred2)
+plot(roc_curve2,
+     col = "blue",
+     main = "Decision Tree ROC Curve")
+text(2, 3, "AUC = 0.66",
+     adj = c(1, 0.5),
+     cex = 1.0,
+     font = 1,
+     col = "blue")
+
+# Estimate the Area Under the Curve for the Decision Model ROC 
+auc(roc_curve2)
