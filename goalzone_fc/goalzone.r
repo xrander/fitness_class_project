@@ -131,12 +131,11 @@ goalzone_test <- goalzone_test %>%
 mean(goalzone_test$attended)
 mean(goalzone_test$pred)
 
+# Model Performance
 mean(goalzone_test$attended == goalzone_test$pred)
 
-# Testing model performance via visualization
+# Visual model performance using ROC(Receiver Operating Characteristics Cost)
 roc_curve <- roc(goalzone_test$attended, goalzone_test$pred)
 
 plot(roc_curve, col = "red")
 auc(roc_curve) #area under the curve is 0.7372
-
-
