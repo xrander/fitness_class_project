@@ -3,6 +3,8 @@ library(tidyverse)
 library(ggthemes)
 library(e1071)
 library(rsample)
+library(pROC)
+library(rpart)
 
 # Set working directories
 setwd("~/Documents/Data Science/Personal Project/fitness_class_project")
@@ -50,7 +52,7 @@ goalzone_fc <- goalzone_fc %>%
          weight = round(replace_na(weight, mean(weight, na.rm = T)), 2),
          time = factor(time, levels = c("AM", "PM"),ordered = T),
          category = factor(ifelse(category == "-", "Unknown", category), ordered = F),
-         attended = factor(attended, levels = c(1,0), labels = c("yes", "no")))
+         attended = as.numeric(attended))
 
 
 summary(goalzone_fc) # quick summary statistics of the data
@@ -69,13 +71,14 @@ goalzone_fc %>%
 # Multiple variable visualization
 ### Create count data of gym exercise category according to attendance
 goalzone_fc_count <- goalzone_fc %>%
+  mutate(attended = as.factor(attended)) %>%
   group_by(attended, category) %>%
   summarize(count = n()) %>%
   arrange(desc(count)) 
 
 ### mutate category levels, adjusted according to their count data
 
-ggplot(goalzone_fc, aes(attended, fill = category))+
+ggplot(goalzone_fc, aes(factor(attended), fill = category))+
   geom_bar(position = "dodge")+
   geom_text(data = goalzone_fc_count,
             aes(y = count, label = count),
@@ -93,7 +96,7 @@ goalzone_fc %>% ggplot(aes(months_as_member))+
        x = "months as member")
 "months as member is positively skewed or right-skewed"
 
-goalzone_fc %>% ggplot(aes(attended, months_as_member))+#, fill = category))+
+goalzone_fc %>% ggplot(aes(factor(attended), months_as_member, fill = category))+
   geom_boxplot()+
   #geom_jitter(alpha = 0.3,
    #           col = "springgreen3")+
@@ -110,11 +113,30 @@ goalzone_fc_md_data <- goalzone_fc %>%
 # Set seed
 set.seed(50)
 
-# Selecting training and test from the data
+# Split the data to train and test data
 split <- initial_split(goalzone_fc_md_data, prop = 0.7)
-goalzone_train <- training(split)
-goalzone_test <- testing(split)
+goalzone_train <- training(split) #training data
+goalzone_test <- testing(split) #testing data
 
-(fmla <- as.formula(attended~.))
-goalzone_model <- glm(fmla, data = goalzone_test)
+# Train the model
+goalzone_model <- glm(attended ~ ., data = goalzone_train, family = "binomial")
+
+summary(goalzone_model)
+
+goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
+
+goalzone_test <- goalzone_test %>%
+  mutate(pred = ifelse(pred < 0.2981, 0, 1)) # The average of the attneded here is 0.2981, hence the reason it is used
+
+mean(goalzone_test$attended)
+mean(goalzone_test$pred)
+
+mean(goalzone_test$attended == goalzone_test$pred)
+
+# Testing model performance via visualization
+roc_curve <- roc(goalzone_test$attended, goalzone_test$pred)
+
+plot(roc_curve, col = "red")
+auc(roc_curve) #area under the curve is 0.7372
+
 
