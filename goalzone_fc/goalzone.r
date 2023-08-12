@@ -18,7 +18,7 @@ goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class
 
 # Data Validation
 str(goalzone_fc) # structure of the data
-# All columns except 'weight', and 'month_as_member' columns doesn't follow the data description
+# All columns columns do not follow the data description except 'weight', and 'month_as_member'
 #The other columns are better mutated as factors.
 
 # Checking for duplicate data
@@ -77,7 +77,6 @@ goalzone_fc_count <- goalzone_fc %>%
   arrange(desc(count)) 
 
 ### mutate category levels, adjusted according to their count data
-
 ggplot(goalzone_fc, aes(factor(attended), fill = category))+
   geom_bar(position = "dodge")+
   geom_text(data = goalzone_fc_count,
@@ -96,14 +95,24 @@ goalzone_fc %>% ggplot(aes(months_as_member))+
        x = "months as member")
 "months as member is positively skewed or right-skewed"
 
-goalzone_fc %>% ggplot(aes(factor(attended), months_as_member, fill = category))+
-  geom_boxplot()+
-  #geom_jitter(alpha = 0.3,
-   #           col = "springgreen3")+
-  labs(y = "Months as member",
-       x = "Attended")+
+
+#Relationship between Attendance and Numbercof Months as Member
+
+goalzone_fc %>% ggplot(aes(months_as_member, attended))+
+  geom_point()+
+  geom_smooth(se = F,
+              method = "glm",
+              method.args = list(family = "binomial")) +
+  labs(x = "Months as member",
+       y = "Attended",
+       title = "Relationship between Attendance and Number of Months as Member")+
   theme_igray()
 
+goalzone_fc %>% ggplot(aes(factor(attended, labels = c("Absent", "Present")), months_as_member))+
+  geom_boxplot()+
+  labs(x = "Attendance",
+       y = "Months as Members")+
+  theme_igray()
 
 # Type of Machine Learning Problem
 #### To predict the outcome of attendance, a logistic regression or Decision Tree can be used
@@ -127,10 +136,11 @@ goalzone_model <- glm(attended ~ .,
 
 summary(goalzone_model)
 
+# Make predictions with the model
 goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
 
 goalzone_test <- goalzone_test %>%
-  mutate(pred = ifelse(pred < 0.2981, 0, 1)) # The average of the attneded here is 0.2981, hence the reason it is used
+  mutate(pred = ifelse(pred < 0.5, 0, 1)) # The average of the attneded here is 0.307, hence the reason it is used
 
 mean(goalzone_test$attended)
 mean(goalzone_test$pred)
@@ -195,4 +205,8 @@ text(2, 3, "AUC = 0.66",
      col = "blue")
 
 # Estimate the Area Under the Curve for the Decision Model ROC 
+<<<<<<< HEAD
 auc(roc_curve2)
+=======
+auc(roc_curve2)
+>>>>>>> prior_analysis
