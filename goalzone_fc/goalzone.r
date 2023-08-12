@@ -112,7 +112,7 @@ goalzone_fc %>% ggplot(aes(factor(attended, labels = c("Absent", "Present")), mo
   geom_boxplot()+
   labs(x = "Attendance",
        y = "Months as Members")+
-  theme_minimal()
+  theme_igray()
 
 # Type of Machine Learning Problem
 #### To predict the outcome of attendance, a logistic regression or Decision Tree can be used
@@ -136,10 +136,11 @@ goalzone_model <- glm(attended ~ .,
 
 summary(goalzone_model)
 
+# Make predictions with the model
 goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
 
 goalzone_test <- goalzone_test %>%
-  mutate(pred = ifelse(pred < 0.2981, 0, 1)) # The average of the attneded here is 0.2981, hence the reason it is used
+  mutate(pred = ifelse(pred < 0.5, 0, 1)) # The average of the attneded here is 0.307, hence the reason it is used
 
 mean(goalzone_test$attended)
 mean(goalzone_test$pred)
