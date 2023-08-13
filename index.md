@@ -1,5 +1,5 @@
 ---
-title: "Goalzone Fitness Class"
+title: "LogTree Gym Analytics"
 author: "Olamide_Adu"
 date: "2023-08-07"
 output:
@@ -16,7 +16,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-Goalzone is a fitness club chain in Canada. They offer a range of fitness classes in two capacities - 25 and 15.
+Goalzone is a fitness club chain in Canada. They offer a range of fitness classes in two capacities - 25 and 15. Some classes are always fully booked, and fully booked classes often have a low attendance rate. Goalzone
 
 ## The Problem
 Goalzone classes are always fully booked, and it has 
