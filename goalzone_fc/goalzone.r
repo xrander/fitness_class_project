@@ -206,7 +206,11 @@ text(2, 3, "AUC = 0.66",
 
 # Estimate the Area Under the Curve for the Decision Model ROC 
 <<<<<<< HEAD
+<<<<<<< HEAD
 auc(roc_curve2)
+=======
+auc(roc_curve2)
+>>>>>>> prior_analysis
 =======
 auc(roc_curve2)
 >>>>>>> prior_analysis
