@@ -11,19 +11,53 @@ output:
     code_theme: zenburn
     keep_md: true
 ---
-# Goalzone Fitness Class
+
+# Goalzone Fitness Class: Predict the Attendance of Members
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-Goalzone is a fitness club chain in Canada. They offer a range of fitness classes in two capacities - 25 and 15. Some classes are always fully booked, and fully booked classes often have a low attendance rate. Goalzone
 
-## The Problem
-Goalzone classes are always fully booked, and it has 
+## Company Description
+
+GoalZone is a fitness club chain providing fitness classes in Canada. Finally, the fitness classes schedule is back to normal after the COVID-19 restrictions are lifted. However, they have received many complaints from the customers about having a hard time booking a fitness class.
+
+**The Problem**: Some classes are always fully booked, and fully booked classes often have a low attendance rate.
+
+Goalzone wants to increase the number of spaces available for classes. They want to do this by predicting whether the member will attend the class or not. If they can predict a member will not attend the class, they can make another space available
+
+## Customer Question
+
+-   The operation manager has asked to answer the following: - Can you predict the member that will attend a class or not?
+
+## Dataset
+The dataset contains the attendance information for the class scheduled this year so far. The data comes from DataCamp as a part of their Data Science Certificate Project.
+
+Column Name | Criteria
+----|-----
+booking_id | Nominal. The unique identifier of the booking. Missing values are not possible due to the database structure.
+months_as_member | Discrete. The number of months as this fitness club member, minimum 1 month. Replace missing values with the overall average month.
+weight | Continuous. The member's weight in kg, rounded to 2 decimal places. The minimum possible value is 40.00 kg. Replace missing values with the overall average weight.
+days_before | Discrete. The number of days before the class the member registered, minimum 1 day. Replace missing values with 0.
+day_of_week | Nominal. The day of the week of the class. One of “Mon”, “Tue”, “Wed”, “Thu”, “Fri”, “Sat” or “Sun”. Replace missing values with “unknown”.
+time | Ordinal. The time of day of the class. Either “AM” or “PM”. Replace missing values with “unknown”.
+category | Nominal. The category of the fitness class. One of “Yoga”, “Aqua”, “Strength”, “HIIT”, or “Cycling”. Replace missing values with “unknown”.
+attended | Nominal. Whether the member attended the class (1) or not (0). Missing values should be removed.
+
+Load libraries, import data and preview data
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(rsample)
+library(pROC)
+library(rpart)
+library(rpart.plot)
+
+# Import data
+goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class_project/master/fitness_class_2212.csv")
 
 
-```{r cars}
-summary(cars)
 ```
 
 ## Including Plots
