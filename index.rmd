@@ -31,18 +31,19 @@ Goalzone wants to increase the number of spaces available for classes. They want
 -   The operation manager has asked to answer the following: - Can you predict the member that will attend a class or not?
 
 ## Dataset
+
 The dataset contains the attendance information for the class scheduled this year so far. The data comes from DataCamp as a part of their Data Science Certificate Project.
 
-Column Name | Criteria
-----|-----
-booking_id | Nominal. The unique identifier of the booking. Missing values are not possible due to the database structure.
-months_as_member | Discrete. The number of months as this fitness club member, minimum 1 month. Replace missing values with the overall average month.
-weight | Continuous. The member's weight in kg, rounded to 2 decimal places. The minimum possible value is 40.00 kg. Replace missing values with the overall average weight.
-days_before | Discrete. The number of days before the class the member registered, minimum 1 day. Replace missing values with 0.
-day_of_week | Nominal. The day of the week of the class. One of “Mon”, “Tue”, “Wed”, “Thu”, “Fri”, “Sat” or “Sun”. Replace missing values with “unknown”.
-time | Ordinal. The time of day of the class. Either “AM” or “PM”. Replace missing values with “unknown”.
-category | Nominal. The category of the fitness class. One of “Yoga”, “Aqua”, “Strength”, “HIIT”, or “Cycling”. Replace missing values with “unknown”.
-attended | Nominal. Whether the member attended the class (1) or not (0). Missing values should be removed.
+| Column Name      | Criteria                                                                                                                                                            |
+|--------------------------------|----------------------------------------|
+| booking_id       | Nominal. The unique identifier of the booking. Missing values are not possible due to the database structure.                                                       |
+| months_as_member | Discrete. The number of months as this fitness club member, minimum 1 month. Replace missing values with the overall average month.                                 |
+| weight           | Continuous. The member's weight in kg, rounded to 2 decimal places. The minimum possible value is 40.00 kg. Replace missing values with the overall average weight. |
+| days_before      | Discrete. The number of days before the class the member registered, minimum 1 day. Replace missing values with 0.                                                  |
+| day_of_week      | Nominal. The day of the week of the class. One of "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" or "Sun". Replace missing values with "unknown".                         |
+| time             | Ordinal. The time of day of the class. Either "AM" or "PM". Replace missing values with "unknown".                                                                  |
+| category         | Nominal. The category of the fitness class. One of "Yoga", "Aqua", "Strength", "HIIT", or "Cycling". Replace missing values with "unknown".                         |
+| attended         | Nominal. Whether the member attended the class (1) or not (0). Missing values should be removed.                                                                    |
 
 Load libraries, import data and preview data
 
@@ -57,10 +58,17 @@ library(rpart.plot)
 # Import data
 goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class_project/master/fitness_class_2212.csv")
 
-
+head(goalzone_fc) # 
 ```
 
-## Including Plots
+## Data Validation
+```{r}
+## Check the structure of the data to see if column follow the data description
+str(goalzone_fc)
+```
+
+
+Check the structure of the data
 
 You can also embed plots, for example:
 
