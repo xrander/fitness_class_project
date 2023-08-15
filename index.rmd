@@ -1,15 +1,18 @@
 ---
-title: "LogTree Gym Analytics"
-author: "Olamide_Adu"
+title: "Gym Attendance Prediction"
+author: "Olamide Adu"
 date: "2023-08-07"
 output:
-   prettydoc::html_pretty:
-    theme: Architect
+   html_document:
     toc: true
-    toc_float: false
-    highlight: github
-    code_theme: zenburn
+    toc_depth: 3
+    toc_float: true
+    dev: svg
+    theme: simplex
+    highlight: zenburn
+    code_folding: show
     keep_md: true
+    df_print: paged
 ---
 
 # Goalzone Fitness Class: Predict the Attendance of Members
@@ -47,7 +50,7 @@ The dataset contains the attendance information for the class scheduled this yea
 
 Load libraries, import data and preview data
 
-```{r}
+```{r, libraries, results='hide', message = FALSE}
 library(tidyverse)
 library(ggthemes)
 library(rsample)
@@ -58,22 +61,14 @@ library(rpart.plot)
 # Import data
 goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class_project/master/fitness_class_2212.csv")
 
-head(goalzone_fc) # 
+```
+
+```{r}
+goalzone_fc #view document
 ```
 
 ## Data Validation
-```{r}
+```{r, warning = FALSE, message=FALSE}
 ## Check the structure of the data to see if column follow the data description
 str(goalzone_fc)
 ```
-
-
-Check the structure of the data
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
