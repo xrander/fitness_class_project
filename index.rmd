@@ -5,7 +5,7 @@ date: "2023-08-07"
 output:
    html_document:
     toc: true
-    toc_depth: 3
+    toc_depth: 2
     toc_float: true
     dev: svg
     theme: simplex
@@ -21,7 +21,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Company Description
+# Company Description
 
 GoalZone is a fitness club chain providing fitness classes in Canada. Finally, the fitness classes schedule is back to normal after the COVID-19 restrictions are lifted. However, they have received many complaints from the customers about having a hard time booking a fitness class.
 
@@ -33,9 +33,9 @@ Goalzone wants to increase the number of spaces available for classes. They want
 
 -   The operation manager has asked to answer the following: - Can you predict the member that will attend a class or not?
 
-## Dataset
+### Dataset
 
-The dataset contains the attendance information for the class scheduled this year so far. The data comes from DataCamp as a part of their Data Science Certificate Project.
+The dataset contains the attendance information for the class scheduled this year so far. The data comes from DataCamp as a part of their Data Science Certificate Project. The data can also be downloaded from Kaggle.com
 
 | Column Name      | Criteria                                                                                                                                                            |
 |--------------------------------|----------------------------------------|
@@ -48,7 +48,7 @@ The dataset contains the attendance information for the class scheduled this yea
 | category         | Nominal. The category of the fitness class. One of "Yoga", "Aqua", "Strength", "HIIT", or "Cycling". Replace missing values with "unknown".                         |
 | attended         | Nominal. Whether the member attended the class (1) or not (0). Missing values should be removed.                                                                    |
 
-Load libraries, import data and preview data
+## Load Libraries and Import the Data
 
 ```{r, libraries, results='hide', message = FALSE}
 library(tidyverse)
@@ -63,12 +63,127 @@ goalzone_fc <- read_csv("https://raw.githubusercontent.com/xrander/fitness_class
 
 ```
 
-```{r}
+```{r, cols.print = 8}
 goalzone_fc #view document
 ```
 
 ## Data Validation
+
+### Data Structure and Variables
+
+```{r, warning = FALSE, message=FALSE}
+## Check the structure of the data to see if column follow the data description
+dim(goalzone_fc)
+```
+
+The data contains 1500 observations and 8 variables.
+
+I'll start by checking if the data loaded follows the data description above.
+
 ```{r, warning = FALSE, message=FALSE}
 ## Check the structure of the data to see if column follow the data description
 str(goalzone_fc)
 ```
+
+All the variables do not follow the description provided in the dataset section above, except **"attended"**, **"months_as_member"**, and **"weight" column.** The first column, **"booking_id"** is the unique_id and not really of interest here.
+
+Before correcting the variables, I will check for duplicated entries and unique values.
+
+```{r}
+unique(duplicated(goalzone_fc[,1:8])) # To show if observations are duplicated or not
+```
+
+```{r}
+lapply(goalzone_fc[, c(4:8)], unique)
+```
+
+The variable **days_before** should be numeric, **day_of_week** have some inconsistent data, **time**.
+
+```{r correct_}
+# Mutate columns that do not follow data description to write data type
+goalzone_fc <- goalzone_fc %>%
+  mutate(booking_id = as.numeric(booking_id),
+         #trim strings, remove all days which is a recurring character and coarse the figures into numeric data type
+         days_before = as.numeric(str_remove_all(str_trim(days_before), "days")),
+         # rename the observations to aid consistency and coarse to factor data type
+         day_of_week = factor(ifelse(day_of_week == "Wednesday", "Wed",
+                              ifelse(day_of_week == "Fri.", "Fri",
+                                     ifelse(day_of_week == "Monday", "Mon", day_of_week))), level = c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")),
+         
+         time = factor(time, levels = c("AM", "PM"),ordered = T),
+         category = factor(ifelse(category == "-", "Unknown", category), ordered = F),
+         attended = as.numeric(attended))
+```
+
+```{r summary_statistics}
+summary(goalzone_fc)
+```
+
+### Missing Data
+
+From the summary output above, **weight** is having missing data and this will be replaced with the mean.
+
+```{r correct_missing_value}
+# replace missing data with mean of weights and round to 2 decimal place
+goalzone_fc <- goalzone_fc %>%
+  mutate(weight = round(replace_na(weight, mean(weight, na.rm = T)), 2))
+
+summary(goalzone_fc)
+```
+
+## Exploratory Data Analysis
+
+Some insights into the data.
+
+### Day of the Week
+
+```{r}
+goalzone_fc %>%
+  ggplot(aes(day_of_week)) +
+  geom_bar(fill = "springgreen3")+
+  labs(x = "Day of the Week",
+       y = "Count",
+       title = "Total Attendance for Classes Per Day")+
+  theme_void()
+```
+
+### Distribution of Days Before Classes Start
+
+```{r}
+goalzone_fc %>%
+  ggplot(aes(days_before))+
+  geom_bar()+
+  labs(x = "Days Before",
+       title = "Number of Days Before Member Attends the Gym")+
+  geom_text(x = 25,
+            y = 150,
+            label = "Most of the members are having their classes in 10 days to come",
+            color = "tan4",
+            size = 2.8)+
+  coord_flip()+
+  theme_igray()
+```
+### Weight Distribution of Members
+```{r}
+goalzone_fc %>%
+  ggplot(aes(weight))+
+  geom_density()+
+  expand_limits(x = c(45, 180))+
+  labs(x = "weight(kg)",
+       title = "Weight Distribution of Gym Members")+
+  theme_igray()
+```
+
+### Member's Attendance the Gym According to Category
+```{r message= FALSE}
+goalzone_fc %>%
+  ggplot(aes(category, fill = factor(attended)))+
+  geom_bar(position = "dodge",
+           width = 1)+
+  labs(fill = "Attended",
+       x = "Category")+
+  scale_fill_manual(values = c("olivedrab2", "slateblue1"),
+                    labels = c("No", "Yes"))+
+  theme_igray()
+```
+
