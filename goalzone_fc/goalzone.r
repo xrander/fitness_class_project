@@ -96,7 +96,7 @@ goalzone_fc %>% ggplot(aes(months_as_member))+
 "months as member is positively skewed or right-skewed"
 
 
-#Relationship between Attendance and Numbercof Months as Member
+#Relationship between Attendance and Number of Months as Member
 
 goalzone_fc %>% ggplot(aes(months_as_member, attended))+
   geom_point()+
@@ -140,7 +140,7 @@ summary(goalzone_model)
 goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
 
 goalzone_test <- goalzone_test %>%
-  mutate(pred = ifelse(pred < 0.5, 0, 1)) # The average of the attneded here is 0.307, hence the reason it is used
+  mutate(pred = ifelse(pred < 0.5, 0, 1)) 
 
 mean(goalzone_test$attended)
 mean(goalzone_test$pred)
@@ -205,16 +205,4 @@ text(2, 3, "AUC = 0.66",
      col = "blue")
 
 # Estimate the Area Under the Curve for the Decision Model ROC 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 auc(roc_curve2)
-=======
-auc(roc_curve2)
->>>>>>> prior_analysis
-=======
-auc(roc_curve2)
->>>>>>> prior_analysis
-=======
-auc(roc_curve2)
->>>>>>> prior_analysis

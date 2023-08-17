@@ -31,7 +31,7 @@ Goalzone wants to increase the number of spaces available for classes. They want
 
 -   The operation manager has asked to answer the following: - Can you predict the member that will attend a class or not?
 
-### Dataset
+## Dataset
 
 The dataset contains the attendance information for the class scheduled this year so far. The data comes from DataCamp as a part of their Data Science Certificate Project. The data can also be downloaded from Kaggle.com
 
@@ -46,7 +46,7 @@ The dataset contains the attendance information for the class scheduled this yea
 | category         | Nominal. The category of the fitness class. One of "Yoga", "Aqua", "Strength", "HIIT", or "Cycling". Replace missing values with "unknown".                         |
 | attended         | Nominal. Whether the member attended the class (1) or not (0). Missing values should be removed.                                                                    |
 
-## Load Libraries and Import the Data
+# Load Libraries and Import the Data
 
 
 ```r
@@ -72,9 +72,9 @@ goalzone_fc #view document
   </script>
 </div>
 
-## Data Validation
+# Data Validation
 
-### Data Structure and Variables
+## Data Structure and Variables
 
 
 ```r
@@ -132,6 +132,8 @@ unique(duplicated(goalzone_fc[,1:8])) # To show if observations are duplicated o
 ```
 ## [1] FALSE
 ```
+
+There are no duplicate observations.
 
 
 ```r
@@ -203,7 +205,7 @@ summary(goalzone_fc)
 ##  Sun:213
 ```
 
-### Missing Data
+## Missing Data
 
 From the summary output above, **weight** is having missing data and this will be replaced with the mean.
 
@@ -235,11 +237,11 @@ summary(goalzone_fc)
 ##  Sun:213
 ```
 
-## Exploratory Data Analysis
+# Exploratory Data Analysis
 
 Some insights into the data.
 
-### Day of the Week
+## Day of the Week
 
 
 ```r
@@ -249,12 +251,12 @@ goalzone_fc %>%
   labs(x = "Day of the Week",
        y = "Count",
        title = "Total Attendance for Classes Per Day")+
-  theme_void()
+  theme_igray()
 ```
 
-![](index_files/figure-html/unnamed-chunk-6-1.svg)<!-- -->
+![](index_files/figure-html/unnamed-chunk-5-1.svg)<!-- -->
 
-### Distribution of Days Before Classes Start
+## Distribution of Days Before Classes Start
 
 
 ```r
@@ -272,8 +274,10 @@ goalzone_fc %>%
   theme_igray()
 ```
 
-![](index_files/figure-html/unnamed-chunk-7-1.svg)<!-- -->
-### Weight Distribution of Members
+![](index_files/figure-html/unnamed-chunk-6-1.svg)<!-- -->
+
+## Weight Distribution of Members
+
 
 ```r
 goalzone_fc %>%
@@ -285,9 +289,10 @@ goalzone_fc %>%
   theme_igray()
 ```
 
-![](index_files/figure-html/unnamed-chunk-8-1.svg)<!-- -->
+![](index_files/figure-html/unnamed-chunk-7-1.svg)<!-- -->
 
-### Member's Attendance the Gym According to Category
+## Member's Attendance the Gym According to Category
+
 
 ```r
 goalzone_fc %>%
@@ -295,11 +300,90 @@ goalzone_fc %>%
   geom_bar(position = "dodge",
            width = 1)+
   labs(fill = "Attended",
-       x = "Category")+
+       x = "Category",
+       y = "count")+
+  expand_limits(y = (0:500))+
   scale_fill_manual(values = c("olivedrab2", "slateblue1"),
                     labels = c("No", "Yes"))+
   theme_igray()
 ```
 
+![](index_files/figure-html/unnamed-chunk-8-1.svg)<!-- -->
+
+For all the categories of exercise in the gym. members miss gym classes than attend them.
+
+## Distribution of Number of Months as Members across all categories
+
+
+```r
+goalzone_fc %>%
+  ggplot(aes(months_as_member)) +
+  geom_histogram(binwidth = 10,
+                 fill = "mistyrose4")+
+  labs()+
+  facet_wrap(~category, scales = "free_y")
+```
+
 ![](index_files/figure-html/unnamed-chunk-9-1.svg)<!-- -->
+
+For all the categories of classes most of the members have been members for less than 50 months.
+
+## Relationship between Months as Member and Weight of Member
+
+
+```r
+cor(goalzone_fc$months_as_member, goalzone_fc$weight)
+```
+
+```
+## [1] -0.4655935
+```
+
+```r
+ggplot(goalzone_fc, aes(weight, months_as_member))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F, col = "red")+
+  labs(x = "weight (kg)",
+       y = "Months as Member",
+       title = "Relationship between Months as Member and Weight")+
+  theme_clean()+
+  geom_text(x = 100, y = 100, label = "r = -4.66", col = "red")+
+  theme(plot.title = element_text(face = "plain"))
+```
+
+![](index_files/figure-html/unnamed-chunk-10-1.svg)<!-- -->
+
+The chart shows that people who have been gym members for long tend to have their weight reduced, but this is not so for all the case.
+
+## Relationship Between Attendance and Months as Member
+
+
+```r
+goalzone_fc %>% ggplot(aes(months_as_member, attended))+
+  geom_point()+
+  geom_smooth(se = F,
+              method = "glm",
+              method.args = list(family = "binomial")) +
+  labs(x = "Months as member",
+       y = "Attended",
+       title = "Relationship between Attendance and Number of Months as Member")+
+  theme_igray()
+```
+
+```
+## `geom_smooth()` using formula = 'y ~ x'
+```
+
+![](index_files/figure-html/unnamed-chunk-11-1.svg)<!-- -->
+
+The plot shows a logistic relationship
+
+# Model Fitting
+## Prediction Models
+
+-   **The Problem**: Predict which member will or will not attend a gym class.
+
+-   My first approach is to use **logistic regression.** This will be the baseline model, and it is used for its simplicity.
+
+-   My second approach is to use **Decision Trees** approach. This will be used as the comparison model.
 
