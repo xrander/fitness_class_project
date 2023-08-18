@@ -19,7 +19,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-<img src="https://archives.rep-am.com/wp-content/uploads/sites/2/2017/10/20171002-194051-pic-440376295.jpg">
+![](https://archives.rep-am.com/wp-content/uploads/sites/2/2017/10/20171002-194051-pic-440376295.jpg)
 
 # Company Description
 
