@@ -387,3 +387,184 @@ The plot shows a logistic relationship
 
 -   My second approach is to use **Decision Trees** approach. This will be used as the comparison model.
 
+### Splitting the datasets
+
+```r
+# preparing the data
+goalzone_fc_md_data <- goalzone_fc %>%
+  select(-1) 
+
+# Set seed for reproducibility
+set.seed(50)
+
+# Split the data to train and test data
+split <- initial_split(goalzone_fc_md_data, prop = 0.7)
+goalzone_train <- training(split) #training data
+goalzone_test <- testing(split) #testing data
+```
+
+### Training the Model (Logistic Model)
+
+```r
+goalzone_model <- glm(attended ~ .,
+                      data = goalzone_train,
+                      family = "binomial")
+
+summary(goalzone_model)
+```
+
+```
+## 
+## Call:
+## glm(formula = attended ~ ., family = "binomial", data = goalzone_train)
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)      -1.059442   0.845104  -1.254   0.2100    
+## months_as_member  0.121614   0.011037  11.019   <2e-16 ***
+## weight           -0.009192   0.007682  -1.197   0.2314    
+## days_before      -0.313646   0.153185  -2.048   0.0406 *  
+## day_of_weekTue    0.627051   0.432571   1.450   0.1472    
+## day_of_weekWed    0.559122   0.753202   0.742   0.4579    
+## day_of_weekThu    1.976939   0.973334   2.031   0.0422 *  
+## day_of_weekFri    2.352317   1.258583   1.869   0.0616 .  
+## day_of_weekSat    3.198875   1.567332   2.041   0.0413 *  
+## day_of_weekSun    4.039935   1.876025   2.153   0.0313 *  
+## time.L           -0.094105   0.146445  -0.643   0.5205    
+## categoryCycling  -0.425041   0.361030  -1.177   0.2391    
+## categoryHIIT     -0.116860   0.343543  -0.340   0.7337    
+## categoryStrength -0.536814   0.385840  -1.391   0.1641    
+## categoryUnknown  -1.469571   1.117743  -1.315   0.1886    
+## categoryYoga     -0.415716   0.431120  -0.964   0.3349    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1308.78  on 1049  degrees of freedom
+## Residual deviance:  997.43  on 1034  degrees of freedom
+## AIC: 1029.4
+## 
+## Number of Fisher Scoring iterations: 5
+```
+
+### Predictions with Logistic Model
+
+```r
+# Make predictions with the model
+goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
+
+goalzone_test <- goalzone_test %>%
+  mutate(pred = ifelse(pred < 0.5, 0, 1)) 
+```
+
+The logistic model is having a 0.78% accuracy.
+
+### Training Model_2 (Decision Tree)
+
+```r
+goalzone_model2 <-  rpart(attended ~ .,
+                          goalzone_train,
+                          method = "class")
+
+# Visualize the decision tree
+rpart.plot(goalzone_model2,
+           type = 4,
+           box.palette = c("red", "green"),
+           fallen.leaves = TRUE)
+```
+
+![](index_files/figure-html/unnamed-chunk-15-1.svg)<!-- -->
+
+### Predictions with Decision Tree
+
+```r
+# Predict the outcome using model 2
+goalzone_test <- goalzone_test %>%
+  mutate(pred2 = as.numeric(as.character(predict(goalzone_model2, goalzone_test, type = "class"))))
+```
+
+The decision tree is having a 0.76`
+
+# Model Comparison
+Model will be compared using the area under the ROC curve and confusion matrix.
+
+## ROC Curve
+
+### ROC Curve (logistic regression - ROC1)
+
+```r
+# Calculate the ROC
+roc_curve <- roc(goalzone_test$attended, goalzone_test$pred)
+```
+
+```
+## Setting levels: control = 0, case = 1
+```
+
+```
+## Setting direction: controls < cases
+```
+
+```r
+# Visual model performance using ROC(Receiver Operating Characteristics Cost)
+plot(roc_curve,
+     col = "red",
+     main = "Logistic Regression ROC Curve")
+```
+
+![](index_files/figure-html/unnamed-chunk-17-1.svg)<!-- -->
+
+The auc of roc10.6853136
+
+### ROC Curve (decision trees- ROC2)
+
+```r
+roc_curve2<- roc(goalzone_test$attended, goalzone_test$pred2)
+```
+
+```
+## Setting levels: control = 0, case = 1
+```
+
+```
+## Setting direction: controls < cases
+```
+
+```r
+plot(roc_curve2,
+     col = "blue",
+     main = "Decision Tree ROC Curve")
+```
+
+![](index_files/figure-html/unnamed-chunk-18-1.svg)<!-- -->
+
+The auc of the roc2 is 0.6639442.
+
+## Confusion Matrix
+
+```r
+# Logistic regression
+table(goalzone_test$attended, goalzone_test$pred)
+```
+
+```
+##    
+##       0   1
+##   0 294  33
+##   1  65  58
+```
+
+```r
+# Decision tree
+table(goalzone_test$attended, goalzone_test$pred2)
+```
+
+```
+##    
+##       0   1
+##   0 288  39
+##   1  68  55
+```
+
+Model1 performs slightly better than Model2 .

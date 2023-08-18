@@ -11,7 +11,6 @@ output:
     theme: simplex
     highlight: zenburn
     code_folding: show
-    keep_md: true
     df_print: paged
 ---
 
@@ -253,3 +252,98 @@ The plot shows a logistic relationship
 
 -   My second approach is to use **Decision Trees** approach. This will be used as the comparison model.
 
+### Splitting the datasets
+```{r data splitting}
+# preparing the data
+goalzone_fc_md_data <- goalzone_fc %>%
+  select(-1) 
+
+# Set seed for reproducibility
+set.seed(50)
+
+# Split the data to train and test data
+split <- initial_split(goalzone_fc_md_data, prop = 0.7)
+goalzone_train <- training(split) #training data
+goalzone_test <- testing(split) #testing data
+```
+
+### Training the Model (Logistic Model)
+```{r logistic regression}
+goalzone_model <- glm(attended ~ .,
+                      data = goalzone_train,
+                      family = "binomial")
+
+summary(goalzone_model)
+```
+
+### Predictions with Logistic Model
+```{r predictions model 1}
+# Make predictions with the model
+goalzone_test$pred <-predict(goalzone_model, goalzone_test, type = "response")
+
+goalzone_test <- goalzone_test %>%
+  mutate(pred = ifelse(pred < 0.5, 0, 1)) 
+```
+
+The logistic model is having a `r round(mean(goalzone_test$attended == goalzone_test$pred),2)`% accuracy.
+
+### Training Model_2 (Decision Tree)
+```{r decision tree}
+goalzone_model2 <-  rpart(attended ~ .,
+                          goalzone_train,
+                          method = "class")
+
+# Visualize the decision tree
+rpart.plot(goalzone_model2,
+           type = 4,
+           box.palette = c("red", "green"),
+           fallen.leaves = TRUE)
+```
+
+### Predictions with Decision Tree
+```{r model2 predictions}
+# Predict the outcome using model 2
+goalzone_test <- goalzone_test %>%
+  mutate(pred2 = as.numeric(as.character(predict(goalzone_model2, goalzone_test, type = "class"))))
+```
+
+The decision tree is having a `r round(mean(goalzone_test$attended == goalzone_test$pred2), 2)``
+
+# Model Comparison
+Model will be compared using the area under the ROC curve and confusion matrix.
+
+## ROC Curve
+
+### ROC Curve (logistic regression - ROC1)
+```{r roc model 1,  message=FALSE}
+# Calculate the ROC
+roc_curve <- roc(goalzone_test$attended, goalzone_test$pred)
+
+# Visual model performance using ROC(Receiver Operating Characteristics Cost)
+plot(roc_curve,
+     col = "red",
+     main = "Logistic Regression ROC Curve")
+```
+
+The auc of roc1`r auc(roc_curve)`
+
+### ROC Curve (decision trees- ROC2)
+```{r roc curve model2}
+roc_curve2<- roc(goalzone_test$attended, goalzone_test$pred2)
+plot(roc_curve2,
+     col = "blue",
+     main = "Decision Tree ROC Curve")
+```
+
+The auc of the roc2 is `r auc(roc_curve2)`.
+
+## Confusion Matrix
+```{r confusion matrix}
+# Logistic regression
+table(goalzone_test$attended, goalzone_test$pred)
+
+# Decision tree
+table(goalzone_test$attended, goalzone_test$pred2)
+```
+
+Model1 performs slightly better than Model2 .
